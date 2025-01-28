@@ -20,4 +20,10 @@ export class ClientesController {
         const orderType = !query?OrderTypeEnum.ASC : query.order;
         return this.clientesService.obtainAlphabeticClients(orderType);
     }
+
+    @Get('byAge')
+    async getAllByAge(@Query() query: QueryDto) :Promise<HttpResponse>{
+        const orderType = !query?OrderTypeEnum.ASC : query.order;
+        return this.clientesService.obtainByAgeClients(orderType);
+    }
 }

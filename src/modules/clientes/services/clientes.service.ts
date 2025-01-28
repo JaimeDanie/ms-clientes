@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import { ClienteDto } from '../dto/cliente.dto';
 import { HttpResponse } from 'src/shared/interfaces/HttpResponse';
 import { OrderTypeEnum } from 'src/shared/Enums/OrderType.enum';
+import { DateUtils } from 'src/shared/utils/dateUtils';
 
 @Injectable()
 export class ClientesService {
@@ -40,6 +41,17 @@ export class ClientesService {
        return { success:true, data: clients}
     }
 
+    async obtainByAgeClients(order:OrderTypeEnum):Promise<HttpResponse>{
+        const clients = await this.clienteModel.find().sort();
+        const clientsAge = clients.map((client)=>({
+            fullName: client.fullName,
+            age: this.obtainAge(client)
+        }))
+        const clientsAgeSort = order === OrderTypeEnum.ASC?
+        clientsAge.sort((a,b)=>a.age-b.age): clientsAge.sort((a,b)=>b.age-a.age)
+        return { success:true, data: clientsAgeSort}
+     }
+
     async existDocument(cliente:ClienteDto):Promise<boolean>{
         const clienteModel = await this.clienteModel.findOne({ document:cliente.document }).exec();
         return clienteModel !== null;
@@ -48,5 +60,20 @@ export class ClientesService {
     async existEmail(cliente:ClienteDto):Promise<boolean>{
         const clienteModel = await this.clienteModel.findOne({ email:cliente.email }).exec();
         return clienteModel !== null;
+    }
+
+
+    obtainAge( client:Cliente):number {
+
+        const hoy = DateUtils.dateNow();
+        const nacimiento = new Date(client.birthdate);
+        let age = hoy.getFullYear() - nacimiento.getFullYear();
+        const mes = hoy.getMonth() - nacimiento.getMonth();
+        
+        if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+          age--;
+        }
+        
+        return age;
     }
 }
