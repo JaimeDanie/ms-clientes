@@ -4,6 +4,7 @@ import { Cliente, ClienteSchema } from '../schemas/cliente.schema';
 import mongoose from 'mongoose';
 import { ClienteDto } from '../dto/cliente.dto';
 import { HttpResponse } from 'src/shared/interfaces/HttpResponse';
+import { OrderTypeEnum } from 'src/shared/Enums/OrderType.enum';
 
 @Injectable()
 export class ClientesService {
@@ -32,6 +33,11 @@ export class ClientesService {
         }catch(e){
             return { success: false, data: null, message: 'Not saved client'} as HttpResponse;
         }
+    }
+
+    async obtainAlphabeticClients(order:OrderTypeEnum):Promise<HttpResponse>{
+       const clients = await this.clienteModel.find().sort({ fullName:order === OrderTypeEnum.ASC?1:-1 });
+       return { success:true, data: clients}
     }
 
     async existDocument(cliente:ClienteDto):Promise<boolean>{
