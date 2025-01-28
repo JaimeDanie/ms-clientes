@@ -42,14 +42,24 @@ export class ClientesService {
     }
 
     async obtainByAgeClients(order:OrderTypeEnum):Promise<HttpResponse>{
-        const clients = await this.clienteModel.find().sort();
-        const clientsAge = clients.map((client)=>({
-            fullName: client.fullName,
-            age: this.obtainAge(client)
-        }))
+        const clientsAge = await this.obtainClientsAge();
         const clientsAgeSort = order === OrderTypeEnum.ASC?
         clientsAge.sort((a,b)=>a.age-b.age): clientsAge.sort((a,b)=>b.age-a.age)
         return { success:true, data: clientsAgeSort}
+     }
+
+     async obtainMetricsClients():Promise<HttpResponse>{
+        const clientsAge = await this.obtainClientsAge();
+        return { success:true, data: {totalClients: clientsAge.length, average: this.averageEdad(clientsAge)}}
+     }
+  
+     async obtainClientsAge(){
+        const clients = await this.clienteModel.find();
+        const clientsAge = clients.map((client)=>({
+            fullName: client.fullName,
+            age: this.obtainAge(client)
+        }));
+        return clientsAge;
      }
 
     async existDocument(cliente:ClienteDto):Promise<boolean>{
@@ -75,5 +85,13 @@ export class ClientesService {
         }
         
         return age;
+    }
+
+    averageEdad( clientsAge:{fullName:string,age:number}[]):number{
+        let totalAge = 0;
+        clientsAge.forEach((client)=>{
+            totalAge += client.age
+        });
+        return totalAge/clientsAge.length
     }
 }

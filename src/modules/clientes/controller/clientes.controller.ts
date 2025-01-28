@@ -26,4 +26,9 @@ export class ClientesController {
         const orderType = !query?OrderTypeEnum.ASC : query.order;
         return this.clientesService.obtainByAgeClients(orderType);
     }
+
+    @Get('metricsClient')
+    async getMetricsClient() :Promise<HttpResponse>{
+        return this.clientesService.obtainMetricsClients();
+    }
 }
